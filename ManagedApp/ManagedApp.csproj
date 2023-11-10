@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net7.0</TargetFramework>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="System.Buffers" Version="4.5.1" />
+		<PackageReference Include="System.Memory" Version="4.5.4" />
+	</ItemGroup>
+	
+	<ItemGroup>
+		<Content Include="..\x64\Debug\NativeLib.dll" CopyToOutputDirectory="PreserveNewest" Link="NativeLib_x64.dll" />
+	</ItemGroup>
+
+	<Target Name="GenerateNativeHashes" BeforeTargets="BeforeBuild">
+		<!--
+          HACK: When the native DLLs are changed, Visual Studio or MSBUILD doesn't rebuild dependencies of this project.
+          By embedding the hashes of the DLLs in this project's generated assembly, the dependencies will be rebuild too.
+          NOTE: We could also embed the native DLLs are resources
+          TODO: Find a better way to fix this!
+        -->
+		<GetFileHash Files="@(Content)">
+			<Output TaskParameter="Items" ItemName="ContentHashes" />
+		</GetFileHash>
+		<Message Importance="High" Text="@(ContentHashes->'%(Identity): %(FileHash)')" />
+		<ItemGroup>
+			<AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+				<_Parameter1>NativeHash</_Parameter1>
+				<_Parameter2>@(ContentHashes->'%(Identity): %(FileHash)')</_Parameter2>
+			</AssemblyAttribute>
+		</ItemGroup>
+	</Target>
+</Project>

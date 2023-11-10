@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ManagedApp": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}
